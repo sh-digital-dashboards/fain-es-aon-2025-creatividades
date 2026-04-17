@@ -1,0 +1,352 @@
+
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .wrap { padding: 1.5rem 0; font-family: var(--font-sans); }
+  .section-title { font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--color-text-tertiary); margin: 2rem 0 .75rem; }
+  .funnel-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .funnel-card { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1rem; border: 0.5px solid var(--color-border-tertiary); }
+  .funnel-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .07em; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: .6rem; }
+  .vis-label { background: var(--color-background-info); color: var(--color-text-info); }
+  .conv-label { background: var(--color-background-warning); color: var(--color-text-warning); }
+  .rmk-label { background: #EAF3DE; color: #3B6D11; }
+  .dark-mode .rmk-label { background: #173404; color: #C0DD97; }
+  .funnel-card h3 { font-size: 13px; font-weight: 500; margin: 0 0 .25rem; color: var(--color-text-primary); line-height: 1.4; }
+  .funnel-card .sub { font-size: 12px; color: var(--color-text-secondary); margin: 0 0 .75rem; }
+  .metric-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: .5rem; }
+  .metric { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 5px 10px; font-size: 12px; }
+  .metric span { font-weight: 500; color: var(--color-text-primary); }
+  .metric small { color: var(--color-text-tertiary); display: block; font-size: 10px; margin-top: 1px; }
+  .tag { font-size: 11px; padding: 2px 7px; border-radius: 3px; display: inline-flex; align-items: center; gap: 4px; }
+  .tag-ok { background: var(--color-background-success); color: var(--color-text-success); }
+  .tag-warn { background: var(--color-background-warning); color: var(--color-text-warning); }
+  .tag-bad { background: var(--color-background-danger); color: var(--color-text-danger); }
+  .divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 1.5rem 0; }
+  .insight-list { display: flex; flex-direction: column; gap: 8px; }
+  .insight { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: .75rem 1rem; border-left: 3px solid transparent; font-size: 13px; color: var(--color-text-primary); line-height: 1.5; }
+  .insight.good { border-color: #1D9E75; }
+  .insight.warn { border-color: #BA7517; }
+  .insight.bad { border-color: #E24B4A; }
+  .insight strong { font-weight: 500; }
+  .brief-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .brief-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; }
+  .brief-card h4 { font-size: 13px; font-weight: 500; margin: 0 0 .6rem; color: var(--color-text-primary); }
+  .brief-card ul { margin: 0; padding: 0; list-style: none; }
+  .brief-card li { font-size: 12px; color: var(--color-text-secondary); padding: 3px 0; padding-left: 12px; position: relative; line-height: 1.4; }
+  .brief-card li::before { content: "→"; position: absolute; left: 0; color: var(--color-text-tertiary); font-size: 10px; top: 4px; }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: .5rem; }
+  .pill { font-size: 11px; padding: 2px 8px; border-radius: 20px; border: 0.5px solid var(--color-border-secondary); color: var(--color-text-secondary); }
+  .status-bar { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .stat-item { display: flex; flex-direction: column; }
+  .stat-item .val { font-size: 22px; font-weight: 500; color: var(--color-text-primary); line-height: 1; }
+  .stat-item .lbl { font-size: 11px; color: var(--color-text-tertiary); margin-top: 3px; text-transform: uppercase; letter-spacing: .06em; }
+  .sep { width: 0.5px; background: var(--color-border-tertiary); align-self: stretch; }
+  @media (max-width: 520px) {
+    .funnel-grid, .brief-grid { grid-template-columns: 1fr; }
+  }
+</style>
+<div class="wrap">
+
+  <div class="status-bar">
+    <div class="stat-item"><span class="val">12.862€</span><span class="lbl">Inversión total</span></div>
+    <div class="sep"></div>
+    <div class="stat-item"><span class="val">8,6M</span><span class="lbl">Impresiones</span></div>
+    <div class="sep"></div>
+    <div class="stat-item"><span class="val">2,77M</span><span class="lbl">Alcance único</span></div>
+    <div class="sep"></div>
+    <div class="stat-item"><span class="val">13</span><span class="lbl">Creatividades analizadas</span></div>
+    <div class="sep"></div>
+    <div class="stat-item"><span class="val">Sep'25–Abr'26</span><span class="lbl">Período</span></div>
+  </div>
+
+  <div class="section-title">Análisis por fase de funnel</div>
+
+  <div class="funnel-grid">
+
+    <!-- VISIBILIDAD -->
+    <div class="funnel-card">
+      <span class="funnel-label vis-label">Visibilidad / Alcance</span>
+      <h3>video_reel_alcance_visibilidad</h3>
+      <p class="sub">Paused · Advantage_audiencias</p>
+      <div class="metric-row">
+        <div class="metric"><span>1,53M</span><small>Alcance</small></div>
+        <div class="metric"><span>1,30€</span><small>Coste/alcance (CPM equiv.)</small></div>
+        <div class="metric"><span>2,58</span><small>Frecuencia</small></div>
+      </div>
+      <div class="pill-row">
+        <span class="tag tag-ok">Máximo alcance histórico</span>
+        <span class="tag tag-warn">Sin clasificación de calidad</span>
+      </div>
+    </div>
+
+    <div class="funnel-card">
+      <span class="funnel-label vis-label">Visibilidad / Alcance</span>
+      <h3>carrusel_alcance_visibilidad</h3>
+      <p class="sub">Activo · Advantage_audiencias</p>
+      <div class="metric-row">
+        <div class="metric"><span>556K</span><small>Alcance</small></div>
+        <div class="metric"><span>1,01€</span><small>Coste/alcance</small></div>
+        <div class="metric"><span>2,11</span><small>Frecuencia</small></div>
+      </div>
+      <div class="pill-row">
+        <span class="tag tag-bad">Calidad por debajo media</span>
+        <span class="tag tag-warn">Menor alcance que el vídeo</span>
+      </div>
+    </div>
+
+    <div class="funnel-card">
+      <span class="funnel-label vis-label">Visibilidad / Branding</span>
+      <h3>post_1_trabajo_que_la_ia_jamas_te_quitara</h3>
+      <p class="sub">Activo · segmento_advantage_feed</p>
+      <div class="metric-row">
+        <div class="metric"><span>590K</span><small>Alcance</small></div>
+        <div class="metric"><span>0,81€</span><small>Coste/alcance</small></div>
+        <div class="metric"><span>1,75</span><small>Frecuencia</small></div>
+      </div>
+      <div class="pill-row">
+        <span class="tag tag-ok">Menor coste/alcance activo</span>
+        <span class="tag tag-ok">Calidad media</span>
+        <span class="tag tag-ok">Frecuencia saludable</span>
+      </div>
+    </div>
+
+    <!-- CONVERSIÓN -->
+    <div class="funnel-card">
+      <span class="funnel-label conv-label">Conversión</span>
+      <h3>stories_conversión_residencial_mantenimiento_2026</h3>
+      <p class="sub">Activo · residencial_mantenimiento_stories_2026</p>
+      <div class="metric-row">
+        <div class="metric"><span>0,159€</span><small>Coste/resultado ⭐</small></div>
+        <div class="metric"><span>1.926</span><small>Visitas landing</small></div>
+        <div class="metric"><span>1,87</span><small>Frecuencia</small></div>
+      </div>
+      <div class="pill-row">
+        <span class="tag tag-ok">Calidad por encima media</span>
+        <span class="tag tag-ok">Mejor CPR de conversión</span>
+        <span class="tag tag-bad">Conv. por debajo media</span>
+      </div>
+    </div>
+
+    <div class="funnel-card">
+      <span class="funnel-label conv-label">Conversión</span>
+      <h3>storie_conversión_modernización</h3>
+      <p class="sub">Activo · residencial_profesional_modernización_storie</p>
+      <div class="metric-row">
+        <div class="metric"><span>0,240€</span><small>Coste/resultado</small></div>
+        <div class="metric"><span>2.257</span><small>Visitas landing</small></div>
+        <div class="metric"><span>1,70</span><small>Frecuencia</small></div>
+      </div>
+      <div class="pill-row">
+        <span class="tag tag-ok">Calidad media</span>
+        <span class="tag tag-ok">Frecuencia baja (buena)</span>
+        <span class="tag tag-bad">Conv. por debajo media</span>
+      </div>
+    </div>
+
+    <div class="funnel-card">
+      <span class="funnel-label conv-label">Conversión</span>
+      <h3>carrusel_conversión_modernización</h3>
+      <p class="sub">Activo · residencial_profesional_modernización</p>
+      <div class="metric-row">
+        <div class="metric"><span>0,192€</span><small>Coste/resultado</small></div>
+        <div class="metric"><span>19.265</span><small>Visitas landing ⭐</small></div>
+        <div class="metric"><span>3,42</span><small>Frecuencia ⚠</small></div>
+      </div>
+      <div class="pill-row">
+        <span class="tag tag-ok">Mayor volumen de tráfico</span>
+        <span class="tag tag-warn">Frecuencia alta</span>
+        <span class="tag tag-bad">Conv. crítica (&lt;20% peers)</span>
+      </div>
+    </div>
+
+    <div class="funnel-card">
+      <span class="funnel-label conv-label">Conversión</span>
+      <h3>stories_conversión_oficinas_mantenimiento</h3>
+      <p class="sub">Activo · oficinas_mantenimiento_stories</p>
+      <div class="metric-row">
+        <div class="metric"><span>0,368€</span><small>Coste/resultado</small></div>
+        <div class="metric"><span>2.770</span><small>Visitas landing</small></div>
+        <div class="metric"><span>1,80</span><small>Frecuencia</small></div>
+      </div>
+      <div class="pill-row">
+        <span class="tag tag-warn">CPR más alto de conversión</span>
+        <span class="tag tag-ok">Calidad media</span>
+        <span class="tag tag-bad">Conv. por debajo media</span>
+      </div>
+    </div>
+
+    <div class="funnel-card">
+      <span class="funnel-label conv-label">Conversión</span>
+      <h3>carrusel_conversión_mantenimiento</h3>
+      <p class="sub">Activo · residencial_profesional_mantenimiento_feed</p>
+      <div class="metric-row">
+        <div class="metric"><span>0,244€</span><small>Coste/resultado</small></div>
+        <div class="metric"><span>6.595</span><small>Visitas landing</small></div>
+        <div class="metric"><span>3,07</span><small>Frecuencia ⚠</small></div>
+      </div>
+      <div class="pill-row">
+        <span class="tag tag-warn">Frecuencia elevada</span>
+        <span class="tag tag-bad">Conv. por debajo media</span>
+      </div>
+    </div>
+
+    <div class="funnel-card">
+      <span class="funnel-label conv-label">Conversión</span>
+      <h3>stories_conversión_residencial_mantenimiento</h3>
+      <p class="sub">Activo · residencial_mantenimiento_stories</p>
+      <div class="metric-row">
+        <div class="metric"><span>0,346€</span><small>Coste/resultado</small></div>
+        <div class="metric"><span>2.896</span><small>Visitas landing</small></div>
+        <div class="metric"><span>1,78</span><small>Frecuencia</small></div>
+      </div>
+      <div class="pill-row">
+        <span class="tag tag-ok">Calidad media</span>
+        <span class="tag tag-bad">Conv. por debajo media</span>
+        <span class="tag tag-warn">Versión _2026 la supera</span>
+      </div>
+    </div>
+
+    <!-- REMARKETING -->
+    <div class="funnel-card">
+      <span class="funnel-label rmk-label">Remarketing</span>
+      <h3>video_reel_rmk</h3>
+      <p class="sub">Activo · audiencias_rmk</p>
+      <div class="metric-row">
+        <div class="metric"><span>37,69€</span><small>Coste/registro</small></div>
+        <div class="metric"><span>36</span><small>Registros totales</small></div>
+        <div class="metric"><span>1,85</span><small>Frecuencia</small></div>
+      </div>
+      <div class="pill-row">
+        <span class="tag tag-bad">Calidad por debajo media</span>
+        <span class="tag tag-bad">Conv. por debajo media</span>
+        <span class="tag tag-warn">Volumen muy bajo</span>
+      </div>
+    </div>
+
+    <div class="funnel-card">
+      <span class="funnel-label rmk-label">Remarketing</span>
+      <h3>storie_rmk</h3>
+      <p class="sub">Activo · audiencias_rmk_storie</p>
+      <div class="metric-row">
+        <div class="metric"><span>28,45€</span><small>Coste/registro</small></div>
+        <div class="metric"><span>4</span><small>Registros totales</small></div>
+        <div class="metric"><span>1,69</span><small>Frecuencia</small></div>
+      </div>
+      <div class="pill-row">
+        <span class="tag tag-bad">Todo por debajo media</span>
+        <span class="tag tag-bad">Solo 4 conversiones</span>
+        <span class="tag tag-bad">Rendimiento crítico</span>
+      </div>
+    </div>
+
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-title">Conclusiones clave para el equipo creativo</div>
+  <div class="insight-list">
+
+    <div class="insight good">
+      <strong>El formato stories/reel supera al carrusel en conversión.</strong> La versión _2026 de stories mantenimiento residencial logra el mejor CPR (0,159€ vs 0,346€ de su predecesora) y es la única pieza con calidad <em>por encima de la media</em>. El vídeo reel de visibilidad es la pieza de mayor alcance de toda la campaña (1,53M personas).
+    </div>
+
+    <div class="insight good">
+      <strong>La modernización como mensaje convierte mejor que el mantenimiento.</strong> El carrusel y la storie de modernización tienen los mejores CPR dentro de sus respectivos formatos. El usuario responde más a la propuesta de mejora/upgrade que a la de conservación/mantenimiento.
+    </div>
+
+    <div class="insight good">
+      <strong>El post de contenido ("IA no te quitará el trabajo") tiene el mejor coste de alcance activo (0,81€).</strong> El contenido de valor editorial en feed funciona mejor que el carrusel de alcance (1,01€). Esto sugiere que el ángulo educativo/informativo conecta mejor con la audiencia en la fase de visibilidad.
+    </div>
+
+    <div class="insight warn">
+      <strong>La frecuencia está disparándose en las piezas de conversión más antiguas.</strong> Los carruseles de mantenimiento (3,07) y modernización (3,42) están en rango de fatiga de audiencia. Los mismos usuarios ven el mismo anuncio 3+ veces, lo que explica el deterioro de la tasa de conversión aunque el tráfico siga llegando.
+    </div>
+
+    <div class="insight warn">
+      <strong>Todos los anuncios de conversión tienen clasificación de conversión por debajo de la media.</strong> El algoritmo de Meta indica que las landing pages o el flujo post-clic no están convirtiendo bien. El problema puede ser creativo (mismatch mensaje/landing) o de UX. Las nuevas piezas deben tener una narrativa más directa con la CTA y reducir la fricción percibida.
+    </div>
+
+    <div class="insight bad">
+      <strong>Las piezas de remarketing están en estado crítico y no justifican la inversión actual.</strong> El storie_rmk tiene solo 4 registros totales con un CPR de 28€. El video_reel_rmk suma 36 registros a 37€/cada uno. La calidad creativa de ambas piezas está clasificada por debajo del 35% de los anuncios del sector, lo que indica un problema estructural de mensaje y formato, no solo de audiencia.
+    </div>
+
+    <div class="insight bad">
+      <strong>El carrusel de alcance activo tiene calidad por debajo de la media</strong> mientras que el vídeo (pausado) fue claramente superior. En visibilidad, el formato vídeo/reel debe priorizarse sobre el carrusel estático como vehículo principal.
+    </div>
+
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-title">Briefing para nuevas creatividades por fase</div>
+  <div class="brief-grid">
+
+    <div class="brief-card">
+      <span class="funnel-label vis-label" style="margin-bottom:.6rem;">Visibilidad</span>
+      <h4>Qué mantener</h4>
+      <ul>
+        <li>Formato reel/vídeo vertical como pieza principal</li>
+        <li>Ángulo editorial o de contenido de valor (modelo del post de IA)</li>
+        <li>Audiencias Advantage+ para maximizar alcance eficiente</li>
+      </ul>
+      <h4 style="margin-top:.75rem;">Qué cambiar</h4>
+      <ul>
+        <li>Sustituir el carrusel de alcance (calidad baja) por nueva pieza vídeo</li>
+        <li>Explorar mensajes educativos sobre el sector (ej: "por qué externalizar el FM")</li>
+        <li>Rotar creatividades cada 6-8 semanas para no superar frecuencia 2,5</li>
+      </ul>
+      <div class="pill-row">
+        <span class="pill">Reel 15-30s</span>
+        <span class="pill">Hook primeros 3s</span>
+        <span class="pill">Sin CTA dura</span>
+      </div>
+    </div>
+
+    <div class="brief-card">
+      <span class="funnel-label conv-label" style="margin-bottom:.6rem;">Conversión</span>
+      <h4>Qué mantener</h4>
+      <ul>
+        <li>Formato stories como pieza prioritaria (mejor CPR)</li>
+        <li>Segmentación por servicio (mantenimiento / modernización / oficinas)</li>
+        <li>Mensaje de modernización/transformación como eje principal</li>
+      </ul>
+      <h4 style="margin-top:.75rem;">Qué cambiar</h4>
+      <ul>
+        <li>Reemplazar los carruseles de alta frecuencia (nuevas piezas urgente)</li>
+        <li>CTA más directa y alineada con la landing page</li>
+        <li>Testimonios o prueba social en el creativo (sectores residencial y oficinas)</li>
+        <li>Para oficinas: adaptar el mensaje al decisor B2B (gestor de edificio)</li>
+      </ul>
+      <div class="pill-row">
+        <span class="pill">Stories 9:16</span>
+        <span class="pill">Beneficio concreto</span>
+        <span class="pill">CTA directa</span>
+        <span class="pill">Social proof</span>
+      </div>
+    </div>
+
+    <div class="brief-card">
+      <span class="funnel-label rmk-label" style="margin-bottom:.6rem;">Remarketing</span>
+      <h4>Qué mantener</h4>
+      <ul>
+        <li>Ambos formatos (vídeo + stories) para cobertura de placements</li>
+        <li>Segmentación por audiencias cálidas</li>
+      </ul>
+      <h4 style="margin-top:.75rem;">Qué cambiar (todo)</h4>
+      <ul>
+        <li>Rediseño completo de concepto: pasar de branding a mensaje de urgencia/oferta</li>
+        <li>Diferenciar claramente del creativo de conversión (no repetir el mismo mensaje)</li>
+        <li>Incluir objeción-respuesta: abordar por qué no han contactado todavía</li>
+        <li>Probar formatos de testimonio en vídeo o casos de éxito reales</li>
+        <li>Revisar el flujo post-clic: posible desconexión landing vs. promesa del anuncio</li>
+      </ul>
+      <div class="pill-row">
+        <span class="pill">Urgencia / oferta</span>
+        <span class="pill">Testimonio real</span>
+        <span class="pill">Objeción-respuesta</span>
+      </div>
+    </div>
+
+  </div>
+
+</div>
