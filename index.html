@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAIN España · Dashboard Creatividades · Always On</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blue: #1A56A0; --blue-light: #D6E4F5;
+  --amber: #BA7517; --amber-light: #FFF3CD;
+  --green: #1D9E75; --green-light: #E8F5E9; --green-dark: #1B6B2E;
+  --red: #C0392B; --red-light: #FDECEA; --red-dark: #8B1A1A;
+  --purple: #6B21A8; --purple-light: #F3E8FF;
+  --gray: #F5F5F5; --gray2: #E8E8E8; --gray3: #888;
+  --text: #1a1a1a; --text2: #555; --text3: #888;
+  --radius: 10px; --shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #F0F2F5; color: var(--text); font-size: 13px; }
+.header { background: var(--blue); color: white; padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.header h1 { font-size: 20px; font-weight: 600; }
+.header .meta { font-size: 12px; opacity: .75; margin-top: 3px; }
+.header .period { font-size: 12px; background: rgba(255,255,255,.15); padding: 4px 12px; border-radius: 20px; }
+.kpi-bar { background: white; border-bottom: 1px solid #e0e0e0; padding: 14px 32px; display: flex; gap: 36px; flex-wrap: wrap; }
+.kpi .val { font-size: 22px; font-weight: 700; color: var(--blue); line-height: 1; }
+.kpi .lbl { font-size: 11px; color: var(--text3); margin-top: 3px; text-transform: uppercase; letter-spacing: .05em; }
+.kpi-sep { width: 1px; background: #e0e0e0; align-self: stretch; }
+.tabs { background: white; border-bottom: 2px solid var(--gray2); padding: 0 32px; display: flex; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 6px rgba(0,0,0,.07); overflow-x: auto; }
+.tab { padding: 13px 20px; font-size: 13px; font-weight: 500; color: var(--text3); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap; transition: color .15s; }
+.tab:hover { color: var(--blue); }
+.tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+.main { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
+.section { display: none; }
+.section.active { display: block; }
+.section-title { font-size: 16px; font-weight: 700; color: var(--blue); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--blue-light); }
+.ad-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 20px; margin-bottom: 32px; }
+.ad-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; border: 1px solid #e8e8e8; display: flex; flex-direction: column; }
+.ad-card.best { border: 2px solid var(--green); }
+.ad-card.critical { border: 1px solid #f0a0a0; }
+.ad-card-header { padding: 12px 14px 10px; border-bottom: 1px solid var(--gray2); }
+.ad-name { font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 4px; font-family: 'SF Mono','Fira Code',monospace; word-break: break-all; line-height: 1.4; }
+.ad-id { font-size: 10px; color: var(--text3); margin-bottom: 5px; letter-spacing: .02em; }
+.ad-meta { display: flex; gap: 5px; flex-wrap: wrap; }
+.badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; }
+.b-active { background:#E8F5E9; color:#1B6B2E; }
+.b-inactive { background:#F5F5F5; color:#888; }
+.b-stopped { background:#FFF3CD; color:#7B5200; }
+.b-vis { background:var(--blue-light); color:var(--blue); }
+.b-conv { background:var(--amber-light); color:var(--amber); }
+.b-rmk { background:var(--purple-light); color:var(--purple); }
+.b-best { background:#E8F5E9; color:#1B6B2E; }
+.b-warn { background:#FFF3CD; color:#7B5200; }
+.b-crit { background:#FDECEA; color:#8B1A1A; }
+.metrics { padding: 10px 14px; display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; border-bottom: 1px solid var(--gray2); }
+.metric { background: var(--gray); border-radius: 6px; padding: 6px 8px; }
+.metric.hi { background:#E8F5E9; }
+.metric.hi .mv { color:var(--green-dark); }
+.metric.wa { background:#FFF3CD; }
+.metric.wa .mv { color:var(--amber); }
+.mv { font-size: 14px; font-weight: 700; color: var(--text); }
+.ml { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.quality { padding: 8px 14px; display: flex; gap: 5px; flex-wrap: wrap; border-bottom: 1px solid var(--gray2); }
+.q-above { font-size:10px; padding:2px 7px; border-radius:3px; font-weight:500; background:#E8F5E9; color:#1B6B2E; }
+.q-mid { font-size:10px; padding:2px 7px; border-radius:3px; font-weight:500; background:#FFF9E6; color:#856404; }
+.q-below { font-size:10px; padding:2px 7px; border-radius:3px; font-weight:500; background:#FDECEA; color:#8B1A1A; }
+.q-na { font-size:10px; padding:2px 7px; border-radius:3px; font-weight:500; background:#F5F5F5; color:#888; }
+.insight { margin: 10px 14px 0; padding: 9px 12px; border-radius: 6px; font-size: 12px; line-height: 1.5; }
+.ig { background:var(--green-light); color:var(--green-dark); border-left:3px solid var(--green); }
+.iw { background:var(--amber-light); color:var(--amber); border-left:3px solid var(--amber); }
+.ib { background:var(--red-light); color:var(--red-dark); border-left:3px solid var(--red); }
+.ii { background:var(--blue-light); color:var(--blue); border-left:3px solid var(--blue); }
+.preview-wrap { padding: 12px 14px; margin-top: auto; }
+.preview-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:9px 14px; background:#1877F2; color:white; border:none; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer; text-decoration:none; transition:background .15s; }
+.preview-btn:hover { background:#1565d8; }
+.preview-btn.off { background:var(--gray2); color:var(--text3); cursor:default; pointer-events:none; }
+/* CONCLUSIONS */
+.conc-grid { display:grid; gap:12px; }
+.cc { background:white; border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 20px; border-left:4px solid transparent; }
+.cc.g { border-left-color:var(--green); }
+.cc.w { border-left-color:var(--amber); }
+.cc.b { border-left-color:var(--red); }
+.cc-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; }
+.cc.g .cc-lbl { color:var(--green-dark); }
+.cc.w .cc-lbl { color:var(--amber); }
+.cc.b .cc-lbl { color:var(--red-dark); }
+.cc p { font-size:13px; color:var(--text2); line-height:1.6; }
+.cc strong { font-weight:600; color:var(--text); }
+/* BRIEFING */
+.brief-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:16px; }
+.bc { background:white; border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; }
+.bc h3 { font-size:13px; font-weight:700; margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid var(--gray2); }
+.hv { color:var(--blue); border-bottom-color:var(--blue-light)!important; }
+.hc { color:var(--amber); border-bottom-color:var(--amber-light)!important; }
+.hr { color:var(--purple); border-bottom-color:var(--purple-light)!important; }
+.bs { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text3); margin:10px 0 5px; }
+.bc ul { list-style:none; padding:0; }
+.bc li { font-size:12px; color:var(--text2); padding:3px 0 3px 14px; position:relative; line-height:1.4; }
+.bc li::before { content:"→"; position:absolute; left:0; color:var(--text3); font-size:10px; top:4px; }
+.pills { display:flex; flex-wrap:wrap; gap:5px; margin-top:10px; }
+.pill { font-size:10px; padding:2px 8px; border-radius:12px; border:1px solid var(--gray2); color:var(--text2); background:var(--gray); }
+/* TABLE */
+.pt { width:100%; border-collapse:collapse; background:white; border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); font-size:12px; margin-top:20px; }
+.pt th { background:var(--blue); color:white; padding:10px 14px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+.pt td { padding:10px 14px; border-bottom:1px solid var(--gray2); vertical-align:top; line-height:1.45; }
+.pt tr:last-child td { border-bottom:none; }
+.pt tr:hover td { background:#fafafa; }
+.fv { background:var(--blue-light); color:var(--blue); font-weight:600; font-size:10px; padding:3px 8px; border-radius:3px; white-space:nowrap; }
+.fc { background:var(--amber-light); color:var(--amber); font-weight:600; font-size:10px; padding:3px 8px; border-radius:3px; white-space:nowrap; }
+.fr { background:var(--purple-light); color:var(--purple); font-weight:600; font-size:10px; padding:3px 8px; border-radius:3px; white-space:nowrap; }
+.tk { color:var(--green-dark); font-size:11px; }
+.tch { color:var(--red-dark); font-size:11px; }
+@media(max-width:768px){
+  .main{padding:16px;} .header{padding:16px;} .kpi-bar{padding:14px 16px;gap:20px;}
+  .brief-grid{grid-template-columns:1fr;} .ad-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>FAIN España · Creatividades Always On</h1>
+    <div class="meta">Meta Ads · Análisis de rendimiento · Sep 2025 – Mar 2026</div>
+  </div>
+  <div class="period">13 anuncios · datos verificados por ID</div>
+</div>
+
+<div class="kpi-bar">
+  <div class="kpi"><span class="val">10.542€</span><span class="lbl">Inversión total</span></div>
+  <div class="kpi-sep"></div>
+  <div class="kpi"><span class="val">7,10M</span><span class="lbl">Impresiones</span></div>
+  <div class="kpi-sep"></div>
+  <div class="kpi"><span class="val">2,95M</span><span class="lbl">Alcance único</span></div>
+  <div class="kpi-sep"></div>
+  <div class="kpi"><span class="val">0,163€</span><span class="lbl">Mejor CPR</span></div>
+  <div class="kpi-sep"></div>
+  <div class="kpi"><span class="val">Sep 2025 – Mar 2026</span><span class="lbl">Período</span></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="show('visibilidad',this)">Visibilidad</div>
+  <div class="tab" onclick="show('conversion',this)">Conversión</div>
+  <div class="tab" onclick="show('remarketing',this)">Remarketing</div>
+  <div class="tab" onclick="show('conclusiones',this)">Conclusiones</div>
+  <div class="tab" onclick="show('briefing',this)">Briefing creativo</div>
+</div>
+
+<div class="main">
+
+<!-- VISIBILIDAD -->
+<div class="section active" id="sec-visibilidad">
+  <div class="section-title">Visibilidad y Alcance</div>
+  <div class="ad-grid">
+
+    <div class="ad-card">
+      <div class="ad-card-header">
+        <div class="ad-name">video_reel_alcance_visibilidad</div>
+        <div class="ad-id">ID: 120234386486520028</div>
+        <div class="ad-meta">
+          <span class="badge b-inactive">Pausado</span>
+          <span class="badge b-vis">Visibilidad / Alcance</span>
+          <span class="badge b-best">⭐ Mayor alcance histórico</span>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric hi"><div class="mv">1,53M</div><div class="ml">Alcance</div></div>
+        <div class="metric"><div class="mv">1,30€</div><div class="ml">Coste/alcance</div></div>
+        <div class="metric"><div class="mv">2,59</div><div class="ml">Frecuencia</div></div>
+      </div>
+      <div class="metrics" style="border-top:none;padding-top:0">
+        <div class="metric"><div class="mv">3,96M</div><div class="ml">Impresiones</div></div>
+        <div class="metric"><div class="mv">837</div><div class="ml">Clics enlace</div></div>
+        <div class="metric"><div class="mv">1.995€</div><div class="ml">Gasto</div></div>
+      </div>
+      <div class="quality"><span class="q-na">Calidad: —</span><span class="q-na">Interacción: —</span><span class="q-na">Conversión: —</span></div>
+      <div class="insight ig">Máximo alcance de toda la campaña (1,53M). Actualmente pausado. Referencia de formato para nuevas piezas de visibilidad.</div>
+      <div class="preview-wrap">
+        <a class="preview-btn" href="https://www.facebook.com/?feed_demo_ad=120234386486520028&h=AQJEB5SN0Scp__98IRJkp8Xk1c0" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Ver preview en Meta
+        </a>
+      </div>
+    </div>
+
+    <div class="ad-card">
+      <div class="ad-card-header">
+        <div class="ad-name">carrusel_alcance_visibilidad</div>
+        <div class="ad-id">ID: 120242018565060028</div>
+        <div class="ad-meta">
+          <span class="badge b-active">Activo</span>
+          <span class="badge b-vis">Visibilidad / Alcance</span>
+          <span class="badge b-crit">Calidad baja</span>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="mv">283K</div><div class="ml">Alcance</div></div>
+        <div class="metric wa"><div class="mv">0,76€</div><div class="ml">Coste/alcance</div></div>
+        <div class="metric"><div class="mv">1,60</div><div class="ml">Frecuencia</div></div>
+      </div>
+      <div class="metrics" style="border-top:none;padding-top:0">
+        <div class="metric"><div class="mv">452K</div><div class="ml">Impresiones</div></div>
+        <div class="metric"><div class="mv">243</div><div class="ml">Clics enlace</div></div>
+        <div class="metric"><div class="mv">215€</div><div class="ml">Gasto</div></div>
+      </div>
+      <div class="quality"><span class="q-below">Calidad: por debajo media &lt;35%</span><span class="q-na">Interacción: —</span><span class="q-na">Conversión: —</span></div>
+      <div class="insight ib">Calidad en percentil más bajo del sector. CTR muy bajo (243 clics). Candidato prioritario a sustitución.</div>
+      <div class="preview-wrap">
+        <a class="preview-btn" href="https://www.facebook.com/?feed_demo_ad=120242018565060028&h=AQL9B62rCRs4KP33wPl0gc3DbQg" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Ver preview en Meta
+        </a>
+      </div>
+    </div>
+
+    <div class="ad-card">
+      <div class="ad-card-header">
+        <div class="ad-name">post_1_trabajo_que_la_ia_jamas_te_quitara</div>
+        <div class="ad-id">ID: 120241215209480028</div>
+        <div class="ad-meta">
+          <span class="badge b-active">Activo</span>
+          <span class="badge b-vis">Visibilidad / Branding</span>
+          <span class="badge b-best">Menor coste/alcance activo</span>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric hi"><div class="mv">405K</div><div class="ml">Alcance</div></div>
+        <div class="metric hi"><div class="mv">0,68€</div><div class="ml">Coste/alcance ⭐</div></div>
+        <div class="metric"><div class="mv">1,51</div><div class="ml">Frecuencia</div></div>
+      </div>
+      <div class="metrics" style="border-top:none;padding-top:0">
+        <div class="metric"><div class="mv">610K</div><div class="ml">Impresiones</div></div>
+        <div class="metric"><div class="mv">153</div><div class="ml">Clics enlace</div></div>
+        <div class="metric"><div class="mv">277€</div><div class="ml">Gasto</div></div>
+      </div>
+      <div class="quality"><span class="q-mid">Calidad: media</span><span class="q-na">Interacción: —</span><span class="q-na">Conversión: —</span></div>
+      <div class="insight ig">Mejor coste por alcance entre activos (0,68€). El ángulo editorial conecta mejor que el carrusel estático.</div>
+      <div class="preview-wrap">
+        <a class="preview-btn" href="https://www.facebook.com/?feed_demo_ad=120241215209480028&h=AQLeJM3eH9aqN8kGsxXTZTzSvKw" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Ver preview en Meta
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CONVERSIÓN -->
+<div class="section" id="sec-conversion">
+  <div class="section-title">Conversión</div>
+  <div class="ad-grid">
+
+    <div class="ad-card best">
+      <div class="ad-card-header">
+        <div class="ad-name">stories_conversión_residencial_mantenimiento_2026</div>
+        <div class="ad-id">ID: 120240708822100028</div>
+        <div class="ad-meta">
+          <span class="badge b-active">Activo</span>
+          <span class="badge b-conv">Mantenimiento residencial</span>
+          <span class="badge b-best">⭐ Mejor CPR · Referencia</span>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric hi"><div class="mv">0,163€</div><div class="ml">CPR ⭐ mejor</div></div>
+        <div class="metric"><div class="mv">1.149</div><div class="ml">Visitas landing</div></div>
+        <div class="metric"><div class="mv">1,66</div><div class="ml">Frecuencia</div></div>
+      </div>
+      <div class="metrics" style="border-top:none;padding-top:0">
+        <div class="metric"><div class="mv">74K</div><div class="ml">Impresiones</div></div>
+        <div class="metric"><div class="mv">1.582</div><div class="ml">Clics enlace</div></div>
+        <div class="metric"><div class="mv">187€</div><div class="ml">Gasto</div></div>
+      </div>
+      <div class="quality"><span class="q-above">Calidad: por encima de la media</span><span class="q-mid">Interacción: media</span><span class="q-below">Conversión: bajo media</span></div>
+      <div class="insight ig">Única pieza con calidad por encima de la media en toda la campaña. Modelo de referencia creativa para todas las nuevas piezas de conversión.</div>
+      <div class="preview-wrap">
+        <a class="preview-btn" href="https://www.facebook.com/?feed_demo_ad=120240708822100028&h=AQLVVt2QC3mhYud3DeE61lbZM2Q" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Ver preview en Meta
+        </a>
+      </div>
+    </div>
+
+    <div class="ad-card">
+      <div class="ad-card-header">
+        <div class="ad-name">storie_conversión_modernización</div>
+        <div class="ad-id">ID: 120240559638570028</div>
+        <div class="ad-meta">
+          <span class="badge b-active">Activo</span>
+          <span class="badge b-conv">Modernización</span>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric hi"><div class="mv">0,233€</div><div class="ml">CPR</div></div>
+        <div class="metric"><div class="mv">1.526</div><div class="ml">Visitas landing</div></div>
+        <div class="metric"><div class="mv">1,60</div><div class="ml">Frecuencia</div></div>
+      </div>
+      <div class="metrics" style="border-top:none;padding-top:0">
+        <div class="metric"><div class="mv">47K</div><div class="ml">Impresiones</div></div>
+        <div class="metric"><div class="mv">1.718</div><div class="ml">Clics enlace</div></div>
+        <div class="metric"><div class="mv">356€</div><div class="ml">Gasto</div></div>
+      </div>
+      <div class="quality"><span class="q-na">Calidad: —</span><span class="q-na">Interacción: —</span><span class="q-na">Conversión: —</span></div>
+      <div class="insight ig">Buen CPR y frecuencia saludable (1,60). Modernización convierte mejor que mantenimiento en todos los formatos.</div>
+      <div class="preview-wrap">
+        <a class="preview-btn" href="https://www.facebook.com/?feed_demo_ad=120240559638570028&h=AQKGo21C1yfq14hGXE5DLv6fHu0" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Ver preview en Meta
+        </a>
+      </div>
+    </div>
+
+    <div class="ad-card">
+      <div class="ad-card-header">
+        <div class="ad-name">carrusel_conversión_modernización</div>
+        <div class="ad-id">ID: 120234398325810028</div>
+        <div class="ad-meta">
+          <span class="badge b-active">Activo</span>
+          <span class="badge b-conv">Modernización</span>
+          <span class="badge b-warn">⚠ Frecuencia alta</span>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="mv">0,199€</div><div class="ml">CPR</div></div>
+        <div class="metric hi"><div class="mv">17.400</div><div class="ml">Visitas ⭐ mayor vol.</div></div>
+        <div class="metric wa"><div class="mv">3,23 ⚠</div><div class="ml">Frecuencia</div></div>
+      </div>
+      <div class="metrics" style="border-top:none;padding-top:0">
+        <div class="metric"><div class="mv">853K</div><div class="ml">Impresiones</div></div>
+        <div class="metric"><div class="mv">17.739</div><div class="ml">Clics enlace</div></div>
+        <div class="metric"><div class="mv">3.455€</div><div class="ml">Gasto</div></div>
+      </div>
+      <div class="quality"><span class="q-mid">Calidad: media</span><span class="q-mid">Interacción: media</span><span class="q-below">Conversión: crítica &lt;20%</span></div>
+      <div class="insight iw">Frecuencia 3,23 → zona de fatiga. La tasa de conversión ha caído al percentil más bajo. Renovación urgente del concepto.</div>
+      <div class="preview-wrap">
+        <a class="preview-btn" href="https://www.facebook.com/?feed_demo_ad=120234398325810028&h=AQKnaJrYHHM5lr5AWI1PdyNufR0" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Ver preview en Meta
+        </a>
+      </div>
+    </div>
+
+    <div class="ad-card">
+      <div class="ad-card-header">
+        <div class="ad-name">carrusel_conversión_mantenimiento</div>
+        <div class="ad-id">ID: 120234397793380028</div>
+        <div class="ad-meta">
+          <span class="badge b-active">Activo</span>
+          <span class="badge b-conv">Mantenimiento residencial</span>
+          <span class="badge b-warn">⚠ Frecuencia alta</span>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="mv">0,247€</div><div class="ml">CPR</div></div>
+        <div class="metric"><div class="mv">6.077</div><div class="ml">Visitas landing</div></div>
+        <div class="metric wa"><div class="mv">2,94 ⚠</div><div class="ml">Frecuencia</div></div>
+      </div>
+      <div class="metrics" style="border-top:none;padding-top:0">
+        <div class="metric"><div class="mv">491K</div><div class="ml">Impresiones</div></div>
+        <div class="metric"><div class="mv">8.911</div><div class="ml">Clics enlace</div></div>
+        <div class="metric"><div class="mv">1.499€</div><div class="ml">Gasto</div></div>
+      </div>
+      <div class="quality"><span class="q-na">Calidad: —</span><span class="q-na">Interacción: —</span><span class="q-na">Conversión: —</span></div>
+      <div class="insight iw">Frecuencia 2,94 → zona de fatiga. Mayor inversión del segmento mantenimiento (1.499€). Renovación urgente necesaria.</div>
+      <div class="preview-wrap">
+        <a class="preview-btn" href="https://www.facebook.com/?feed_demo_ad=120234397793380028&h=AQJKdLFNUCCOy-NufXzyN_ZwzCk" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Ver preview en Meta
+        </a>
+      </div>
+    </div>
+
+    <div class="ad-card">
+      <div class="ad-card-header">
+        <div class="ad-name">stories_conversión_residencial_mantenimiento</div>
+        <div class="ad-id">ID: 120234575717390028</div>
+        <div class="ad-meta">
+          <span class="badge b-active">Activo</span>
+          <span class="badge b-conv">Mantenimiento residencial</span>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="mv">0,348€</div><div class="ml">CPR</div></div>
+        <div class="metric"><div class="mv">2.611</div><div class="ml">Visitas landing</div></div>
+        <div class="metric"><div class="mv">1,79</div><div class="ml">Frecuencia</div></div>
+      </div>
+      <div class="metrics" style="border-top:none;padding-top:0">
+        <div class="metric"><div class="mv">96K</div><div class="ml">Impresiones</div></div>
+        <div class="metric"><div class="mv">3.714</div><div class="ml">Clics enlace</div></div>
+        <div class="metric"><div class="mv">909€</div><div class="ml">Gasto</div></div>
+      </div>
+      <div class="quality"><span class="q-mid">Calidad: media</span><span class="q-mid">Interacción: media</span><span class="q-below">Conversión: bajo media</span></div>
+      <div class="insight iw">Superada por la versión _2026 en CPR (0,348€ vs 0,163€) y calidad. Candidata a sustitución a corto plazo.</div>
+      <div class="preview-wrap">
+        <a class="preview-btn" href="https://www.facebook.com/?feed_demo_ad=120234575717390028&h=AQLTKnMp1BplYCtdVYdmnfd-72Y" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Ver preview en Meta
+        </a>
+      </div>
+    </div>
+
+    <div class="ad-card">
+      <div class="ad-card-header">
+        <div class="ad-name">stories_conversión_oficinas_mantenimiento</div>
+        <div class="ad-id">ID: 120234575117800028</div>
+        <div class="ad-meta">
+          <span class="badge b-active">Activo</span>
+          <span class="badge b-conv">Mantenimiento oficinas</span>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric wa"><div class="mv">0,374€</div><div class="ml">CPR más alto conv.</div></div>
+        <div class="metric"><div class="mv">2.473</div><div class="ml">Visitas landing</div></div>
+        <div class="metric"><div class="mv">1,81</div><div class="ml">Frecuencia</div></div>
+      </div>
+      <div class="metrics" style="border-top:none;padding-top:0">
+        <div class="metric"><div class="mv">119K</div><div class="ml">Impresiones</div></div>
+        <div class="metric"><div class="mv">3.887</div><div class="ml">Clics enlace</div></div>
+        <div class="metric"><div class="mv">925€</div><div class="ml">Gasto</div></div>
+      </div>
+      <div class="quality"><span class="q-mid">Calidad: media</span><span class="q-mid">Interacción: media</span><span class="q-below">Conversión: bajo media</span></div>
+      <div class="insight iw">CPR más alto del funnel de conversión. Necesita adaptación del mensaje al decisor B2B (facility manager).</div>
+      <div class="preview-wrap">
+        <a class="preview-btn" href="https://www.facebook.com/?feed_demo_ad=120234575117800028&h=AQKzo2l0Fk46ZYi72Ew8nOvH7bc" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Ver preview en Meta
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- REMARKETING -->
+<div class="section" id="sec-remarketing">
+  <div class="section-title">Remarketing</div>
+  <div class="ad-grid">
+
+    <div class="ad-card critical">
+      <div class="ad-card-header">
+        <div class="ad-name">video_reel_rmk</div>
+        <div class="ad-id">ID: 120234883101130028</div>
+        <div class="ad-meta">
+          <span class="badge b-active">Activo</span>
+          <span class="badge b-rmk">Remarketing</span>
+          <span class="badge b-crit">🔴 Rendimiento crítico</span>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric wa"><div class="mv">40,76€</div><div class="ml">Coste/registro</div></div>
+        <div class="metric wa"><div class="mv">29</div><div class="ml">Registros totales</div></div>
+        <div class="metric"><div class="mv">1,80</div><div class="ml">Frecuencia</div></div>
+      </div>
+      <div class="metrics" style="border-top:none;padding-top:0">
+        <div class="metric"><div class="mv">172K</div><div class="ml">Impresiones</div></div>
+        <div class="metric"><div class="mv">959</div><div class="ml">Clics enlace</div></div>
+        <div class="metric"><div class="mv">1.182€</div><div class="ml">Gasto</div></div>
+      </div>
+      <div class="quality"><span class="q-below">Calidad: bajo media &lt;35%</span><span class="q-mid">Interacción: media</span><span class="q-below">Conversión: bajo media &lt;35%</span></div>
+      <div class="insight ib">29 registros con 1.182€ invertidos. Calidad y conversión en percentil más bajo del sector. Rediseño conceptual completo urgente.</div>
+      <div class="preview-wrap">
+        <a class="preview-btn" href="https://www.facebook.com/?feed_demo_ad=120234883101130028&h=AQI4oN_QhFbdKUYspfuXyeb1H0Y" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Ver preview en Meta
+        </a>
+      </div>
+    </div>
+
+    <div class="ad-card critical">
+      <div class="ad-card-header">
+        <div class="ad-name">storie_rmk</div>
+        <div class="ad-id">ID: 120238161970160028</div>
+        <div class="ad-meta">
+          <span class="badge b-active">Activo</span>
+          <span class="badge b-rmk">Remarketing</span>
+          <span class="badge b-crit">🔴 Rendimiento crítico</span>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric wa"><div class="mv">24,92€</div><div class="ml">Coste/registro</div></div>
+        <div class="metric wa"><div class="mv">3</div><div class="ml">Registros totales</div></div>
+        <div class="metric"><div class="mv">1,59</div><div class="ml">Frecuencia</div></div>
+      </div>
+      <div class="metrics" style="border-top:none;padding-top:0">
+        <div class="metric"><div class="mv">14,8K</div><div class="ml">Impresiones</div></div>
+        <div class="metric"><div class="mv">114</div><div class="ml">Clics enlace</div></div>
+        <div class="metric"><div class="mv">75€</div><div class="ml">Gasto</div></div>
+      </div>
+      <div class="quality"><span class="q-below">Calidad: bajo media &lt;35%</span><span class="q-below">Interacción: bajo media &lt;35%</span><span class="q-below">Conversión: bajo media &lt;35%</span></div>
+      <div class="insight ib">Solo 3 registros totales. Peor anuncio global de la campaña en todos los indicadores.</div>
+      <div class="preview-wrap">
+        <a class="preview-btn" href="https://www.facebook.com/?feed_demo_ad=120238161970160028&h=AQIf0XWIhXxVn7cvQKHwBJ1zyrM" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Ver preview en Meta
+        </a>
+      </div>
+    </div>
+
+    <div class="ad-card">
+      <div class="ad-card-header">
+        <div class="ad-name">video · sorteo_daniel_oliver_video</div>
+        <div class="ad-id">ID: 120236997992540028</div>
+        <div class="ad-meta"><span class="badge b-stopped">Sin entrega</span><span class="badge b-vis">Sorteo</span></div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="mv">219K</div><div class="ml">Alcance</div></div>
+        <div class="metric"><div class="mv">0,57€</div><div class="ml">Coste/alcance</div></div>
+        <div class="metric"><div class="mv">1,00</div><div class="ml">Frecuencia</div></div>
+      </div>
+      <div class="quality"><span class="q-na">Sin clasificación de calidad</span></div>
+      <div class="insight ii">Anuncio de sorteo puntual. Sin datos de preview disponibles en Meta.</div>
+      <div class="preview-wrap"><span class="preview-btn off">Preview no disponible</span></div>
+    </div>
+
+    <div class="ad-card">
+      <div class="ad-card-header">
+        <div class="ad-name">estático · sorteo_daniel_oliver_estatico</div>
+        <div class="ad-id">ID: 120237004311190028</div>
+        <div class="ad-meta"><span class="badge b-stopped">Sin entrega</span><span class="badge b-vis">Sorteo</span></div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="mv">84K</div><div class="ml">Alcance</div></div>
+        <div class="metric"><div class="mv">0,59€</div><div class="ml">Coste/alcance</div></div>
+        <div class="metric"><div class="mv">1,00</div><div class="ml">Frecuencia</div></div>
+      </div>
+      <div class="quality"><span class="q-na">Sin clasificación de calidad</span></div>
+      <div class="insight ii">Anuncio de sorteo puntual. Sin datos de preview disponibles en Meta.</div>
+      <div class="preview-wrap"><span class="preview-btn off">Preview no disponible</span></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CONCLUSIONES -->
+<div class="section" id="sec-conclusiones">
+  <div class="section-title">Conclusiones clave</div>
+  <div class="conc-grid">
+    <div class="cc g"><div class="cc-lbl">Lo que funciona</div><p>El formato stories supera al carrusel en eficiencia de conversión. <strong>stories_conversión_residencial_mantenimiento_2026</strong> logra el mejor CPR de toda la campaña (0,163€) y es la única pieza con calidad por encima de la media según Meta. Es la referencia creativa absoluta para las nuevas piezas.</p></div>
+    <div class="cc g"><div class="cc-lbl">Lo que funciona</div><p><strong>El mensaje de modernización convierte mejor que el de mantenimiento</strong> en todos los formatos. La storie y el carrusel de modernización obtienen los mejores CPR de sus tipologías. El usuario responde más a la propuesta de mejora que a la de conservación.</p></div>
+    <div class="cc g"><div class="cc-lbl">Lo que funciona</div><p><strong>El contenido editorial tiene el mejor coste por alcance activo</strong> (0,68€ el post de IA vs 0,76€ el carrusel de visibilidad). El ángulo educativo/informativo en feed conecta mejor con la audiencia en fase de descubrimiento.</p></div>
+    <div class="cc w"><div class="cc-lbl">Atención</div><p><strong>Fatiga de audiencia en los carruseles de conversión.</strong> El carrusel de modernización tiene frecuencia 3,23 y el de mantenimiento 2,94. Los mismos usuarios ven el mismo anuncio casi 3 veces, lo que explica el deterioro de la conversión aunque el tráfico siga fluyendo.</p></div>
+    <div class="cc w"><div class="cc-lbl">Atención</div><p><strong>Todos los anuncios de conversión tienen la tasa de conversión por debajo de la media</strong> según Meta. Posible mismatch entre el mensaje del anuncio y la landing page. Las nuevas piezas necesitan una CTA más directa y alineada con el destino.</p></div>
+    <div class="cc b"><div class="cc-lbl">Crítico</div><p><strong>El remarketing está en estado crítico.</strong> Entre video_reel_rmk (29 registros, 1.182€) y storie_rmk (3 registros, 75€) suman solo 32 conversiones. CPR medio de ~38€. Ambas en percentil más bajo del sector en todos los indicadores. No es un retoque, es un rediseño conceptual completo.</p></div>
+    <div class="cc b"><div class="cc-lbl">Crítico</div><p><strong>El carrusel de alcance activo tiene calidad por debajo del 35%</strong> del sector mientras que el vídeo reel pausado alcanzó 1,53M de personas. En visibilidad el formato vídeo debe priorizarse y el carrusel estático reemplazarse.</p></div>
+  </div>
+</div>
+
+<!-- BRIEFING -->
+<div class="section" id="sec-briefing">
+  <div class="section-title">Briefing creativo · Piezas a desarrollar</div>
+  <div class="brief-grid">
+    <div class="bc">
+      <h3 class="hv">Visibilidad</h3>
+      <div class="bs">Qué mantener</div>
+      <ul><li>Formato reel/vídeo vertical como pieza principal</li><li>Ángulo editorial o contenido de valor</li><li>Audiencias Advantage+ para eficiencia de alcance</li></ul>
+      <div class="bs">Qué cambiar</div>
+      <ul><li>Sustituir el carrusel de alcance (calidad &lt;35%)</li><li>Explorar mensajes educativos sobre el sector FM</li><li>Rotar piezas cada 6-8 semanas (frecuencia máx. 2,5)</li></ul>
+      <div class="pills"><span class="pill">Reel 15-30s</span><span class="pill">Hook en 3s</span><span class="pill">Sin CTA dura</span><span class="pill">2 piezas nuevas</span></div>
+    </div>
+    <div class="bc">
+      <h3 class="hc">Conversión</h3>
+      <div class="bs">Qué mantener</div>
+      <ul><li>Stories vertical como formato prioritario</li><li>Segmentación por servicio (mant. / mod. / oficinas)</li><li>Eje de modernización/transformación como mensaje</li></ul>
+      <div class="bs">Qué cambiar</div>
+      <ul><li>Reemplazar carruseles de frecuencia alta (urgente)</li><li>CTA más directa y alineada con la landing</li><li>Prueba social / testimonio en el creativo</li><li>Oficinas: adaptar mensaje al decisor B2B</li></ul>
+      <div class="pills"><span class="pill">Stories 9:16</span><span class="pill">Beneficio concreto</span><span class="pill">Social proof</span><span class="pill">5 piezas nuevas</span></div>
+    </div>
+    <div class="bc">
+      <h3 class="hr">Remarketing</h3>
+      <div class="bs">Qué mantener</div>
+      <ul><li>Cobertura en ambos formatos (vídeo + stories)</li><li>Segmentación por audiencias cálidas</li></ul>
+      <div class="bs">Qué cambiar (todo)</div>
+      <ul><li>Concepto nuevo: urgencia u oferta, no branding</li><li>Diferenciarlo del creativo de conversión</li><li>Objeción-respuesta explícita</li><li>Testimonios reales o casos de éxito en vídeo</li><li>Revisar flujo post-clic (posible desconexión landing)</li></ul>
+      <div class="pills"><span class="pill">Urgencia / oferta</span><span class="pill">Testimonio real</span><span class="pill">2 piezas nuevas</span></div>
+    </div>
+  </div>
+
+  <div style="margin-top:32px">
+    <div class="section-title" style="font-size:14px;">Resumen de piezas a crear</div>
+    <table class="pt">
+      <thead>
+        <tr>
+          <th style="width:100px">Fase</th>
+          <th style="width:130px">Formato</th>
+          <th style="width:70px;text-align:center">Piezas</th>
+          <th>Descripción</th>
+          <th style="width:190px">Mantener</th>
+          <th style="width:190px">Cambiar</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="fv">Visibilidad</span></td>
+          <td>Vídeo Reel 9:16 · 15-30s</td>
+          <td style="text-align:center;font-weight:700">2</td>
+          <td>Sustituye al carrusel_alcance_visibilidad. Ángulo educativo. Referencia: vídeo reel histórico (1,53M alcance).</td>
+          <td class="tk">Formato vídeo vertical. Audiencias Advantage+. Tono informativo sin CTA dura.</td>
+          <td class="tch">Concepto nuevo. Hook en los primeros 3s. Rotar cada 6-8 semanas.</td>
+        </tr>
+        <tr>
+          <td><span class="fc">Conversión</span></td>
+          <td>Stories vertical 9:16</td>
+          <td style="text-align:center;font-weight:700">3</td>
+          <td>Una por segmento: mantenimiento residencial, modernización, oficinas. Referencia: stories_2026 (0,163€ CPR, calidad por encima media).</td>
+          <td class="tk">Stories vertical. Segmentación por servicio. Mensaje de transformación.</td>
+          <td class="tch">CTA directa alineada con landing. Prueba social. Oficinas: mensaje B2B.</td>
+        </tr>
+        <tr>
+          <td><span class="fc">Conversión</span></td>
+          <td>Carrusel feed 1:1 · 3-5 tarjetas</td>
+          <td style="text-align:center;font-weight:700">2</td>
+          <td>Reemplazo urgente de carrusel_modernización (frec. 3,23) y carrusel_mantenimiento (frec. 2,94).</td>
+          <td class="tk">Segmentación por servicio. Beneficio concreto por tarjeta.</td>
+          <td class="tch">Concepto nuevo. Última tarjeta dedicada a CTA. Reducir brecha anuncio-landing.</td>
+        </tr>
+        <tr>
+          <td><span class="fr">Remarketing</span></td>
+          <td>Vídeo Reel 9:16 · 15-20s</td>
+          <td style="text-align:center;font-weight:700">1</td>
+          <td>Rediseño completo de video_reel_rmk. 29 registros con 1.182€ no justifican el concepto actual.</td>
+          <td class="tk">Formato vídeo reel. Audiencias cálidas.</td>
+          <td class="tch">Todo el concepto. Urgencia o testimonio real. Diferenciar del anuncio de conversión.</td>
+        </tr>
+        <tr>
+          <td><span class="fr">Remarketing</span></td>
+          <td>Stories vertical 9:16</td>
+          <td style="text-align:center;font-weight:700">1</td>
+          <td>Rediseño completo de storie_rmk. 3 registros totales, todo en percentil más bajo del sector.</td>
+          <td class="tk">Formato stories. Audiencias cálidas.</td>
+          <td class="tch">Todo el concepto. Caso de éxito o testimonio real. Revisar flujo post-clic.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+
+<script>
+function show(id, tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  tab.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
